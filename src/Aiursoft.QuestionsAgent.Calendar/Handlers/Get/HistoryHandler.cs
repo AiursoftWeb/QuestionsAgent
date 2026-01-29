@@ -1,0 +1,26 @@
+using System.CommandLine;
+using Aiursoft.CommandFramework.Framework;
+using Aiursoft.CommandFramework.Models;
+using Aiursoft.CommandFramework.Services;
+using Aiursoft.QuestionsAgent.PluginFramework.Services;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Aiursoft.QuestionsAgent.Calendar.Handlers.Get;
+
+public class HistoryHandler : ExecutableCommandHandlerBuilder
+{
+    protected  override string Name => "history";
+
+    protected  override string Description => "Show happy history.";
+
+    protected override async Task Execute(ParseResult context)
+    {
+        var verbose = context.GetValue(CommonOptionsProvider.VerboseOption);
+        var services = ServiceBuilder
+            .CreateCommandHostBuilder<Startup>(verbose)
+            .Build().Services;
+        
+        var algorithm = services.GetRequiredService<Algorithm>();
+        await algorithm.GetPoints(true, DateTime.Now);
+    }
+}
