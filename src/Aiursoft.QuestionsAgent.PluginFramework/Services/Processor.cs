@@ -65,8 +65,8 @@ public class Processor
             _logger.LogInformation("Found {Count} questions in {FileName}", fileQuestions.Count, paper.FileName);
             if (fileQuestions.Count == 0) continue;
 
-            var footerContext = paper.Content.Length > AnswerContextLength 
-                ? paper.Content.Substring(paper.Content.Length - AnswerContextLength) 
+            var footerContext = paper.Content.Length > AnswerContextLength
+                ? paper.Content.Substring(paper.Content.Length - AnswerContextLength)
                 : paper.Content;
 
             await _matcher.FillAnswersAsync(fileQuestions, footerContext);

@@ -73,10 +73,6 @@ public class Matcher
             }
         }
     }
-    
-    private class AnswerDTO 
-    { 
-        public string answer { get; set; } = string.Empty;
-        public string analysis { get; set; } = string.Empty;
-    }
+
+
 }

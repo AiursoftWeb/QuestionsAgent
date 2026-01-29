@@ -20,7 +20,7 @@ public class SectionSplitter
     public async Task<List<SectionInfo>> AnalyzeSectionsAsync(List<string> lines)
     {
         _logger.LogInformation("Analyzing document structure...");
-        
+
         var sb = new StringBuilder();
         for (var i = 0; i < lines.Count; i++)
         {
@@ -60,7 +60,7 @@ public class SectionSplitter
         try
         {
             var sections = await _ollamaClient.CallOllamaJson<List<SectionInfo>>(prompt);
-            
+
             if (sections != null)
             {
                 foreach (var s in sections)

@@ -22,12 +22,12 @@ public class Extractor
     public async Task<List<QuestionItem>> ExtractSectionAsync(List<string> allLines, SectionInfo section, string sourceFile)
     {
         var sectionLines = allLines.Skip(section.StartLine).Take(section.EndLine - section.StartLine + 1).ToList();
-        
-        _logger.LogInformation("Processing section: {Type} (L{Start}-L{End}, {Count} lines)", 
+
+        _logger.LogInformation("Processing section: {Type} (L{Start}-L{End}, {Count} lines)",
             section.Type, section.StartLine, section.EndLine, sectionLines.Count);
 
         if (section.Type == "答案" || section.Type == "未知") return new List<QuestionItem>();
-        if (section.Type == "连线") 
+        if (section.Type == "连线")
         {
             _logger.LogInformation("Skipping matching questions section.");
             return new List<QuestionItem>();
@@ -52,14 +52,14 @@ public class Extractor
             var hasContent = false;
             for (var i = 0; i < windowLines.Count; i++)
             {
-                sb.AppendLine($"[L{i}] {windowLines[i]}"); 
+                sb.AppendLine($"[L{i}] {windowLines[i]}");
                 if (!string.IsNullOrWhiteSpace(windowLines[i])) hasContent = true;
             }
             if (!hasContent) { cursor++; continue; }
 
             var contextText = sb.ToString();
-            var instruction = singleItemMode 
-                ? $"从 [L0] 开始，提取**第一道**完整的【{type}】。" 
+            var instruction = singleItemMode
+                ? $"从 [L0] 开始，提取**第一道**完整的【{type}】。"
                 : $"从 [L0] 开始，提取紧接着的所有【{type}】（可能有多道，例如 1. xx 2. xx）。";
 
             var prompt = @$"
@@ -90,11 +90,11 @@ public class Extractor
 2. 即使是名词解释，如果这一行写着 ""1. 悲剧 2. 喜剧""，请在 data 数组里返回两个对象！
 3. end_line_index 必须准确，指示处理到了哪里。
 ";
-            
+
             try
             {
                 var result = await _ollamaClient.CallOllamaJson<ExtractionResult>(prompt);
-                if (result != null && result.Found && result.Data != null && result.Data.Count > 0)
+                if (result != null && result.Found && result.Data.Count > 0)
                 {
                     var endIndex = result.EndLineIndex;
                     if (endIndex >= windowLines.Count) endIndex = windowLines.Count - 1;
@@ -106,11 +106,11 @@ public class Extractor
                         q.Type = type;
                         q.OriginalFilename = sourceFile;
                         results.Add(q);
-                        
+
                         var safeQ = q.Question.Length > 20 ? q.Question.Substring(0, 20) + "..." : q.Question;
                         _logger.LogInformation("Found: {Question}", safeQ);
                     }
-                    
+
                     cursor += jump;
                 }
                 else
@@ -126,12 +126,6 @@ public class Extractor
         }
         return results;
     }
-    
-    private class ExtractionResult
-    {
-        public bool Found { get; set; }
-        [JsonPropertyName("end_line_index")]
-        public int EndLineIndex { get; set; }
-        public List<QuestionItem> Data { get; set; } = new();
-    }
+
+
 }

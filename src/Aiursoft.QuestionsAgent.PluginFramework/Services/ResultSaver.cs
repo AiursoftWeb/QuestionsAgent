@@ -26,12 +26,12 @@ public class ResultSaver
         {
             var fileName = $"{g.Key}.json".Replace("/", "_");
             var path = Path.Combine(outputDir, fileName);
-            
+
             var existing = new List<QuestionItem>();
 
             if (File.Exists(path))
             {
-                try 
+                try
                 {
                     var oldJson = await File.ReadAllTextAsync(path);
                     if (!string.IsNullOrWhiteSpace(oldJson))
@@ -47,10 +47,10 @@ public class ResultSaver
 
             existing.AddRange(g);
 
-            var json = JsonSerializer.Serialize(existing, new JsonSerializerOptions 
-            { 
-                WriteIndented = true, 
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping 
+            var json = JsonSerializer.Serialize(existing, new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             });
             await File.WriteAllTextAsync(path, json);
             _logger.LogInformation("Saved {Count} items to {Path}", g.Count(), path);
