@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.2</Version>
+    <AssemblyName>questions-agent</AssemblyName>
+    <Version>1.0.0</Version>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>happy-recorder</AssemblyName>
+    <AssemblyName>questions-agent</AssemblyName>
     <RootNamespace>Aiursoft.QuestionsAgent</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>happy-recorder</ToolCommandName>
+    <ToolCommandName>questions-agent</ToolCommandName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SelfContained>false</SelfContained>
@@ -19,9 +20,9 @@
     <Company>Aiursoft</Company>
     <Product>QuestionsAgent</Product>
     <Authors>aiursoft</Authors>
-    <Description>A cli tool project helps recording happy times and reactions.</Description>
+    <Description>A CLI tool to parse markdown question files into JSON format using AI.</Description>
     <PackageId>Aiursoft.QuestionsAgent</PackageId>
-    <PackageTags>cli nuget dotnet happy</PackageTags>
+    <PackageTags>cli nuget dotnet questions ai</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.com/Aiursoft/QuestionsAgent</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
@@ -29,7 +30,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aiursoft.QuestionsAgent.Calendar\Aiursoft.QuestionsAgent.Calendar.csproj" />
+    <ProjectReference Include="..\Aiursoft.QuestionsAgent.PluginFramework\Aiursoft.QuestionsAgent.PluginFramework.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="." />
