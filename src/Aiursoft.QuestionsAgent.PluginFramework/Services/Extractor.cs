@@ -19,7 +19,7 @@ public class Extractor
         _logger = logger;
     }
 
-    public async Task<List<QuestionItem>> ExtractSectionAsync(List<string> allLines, SectionInfo section, string sourceFile)
+    public virtual async Task<List<QuestionItem>> ExtractSectionAsync(List<string> allLines, SectionInfo section, string sourceFile)
     {
         var sectionLines = allLines.Skip(section.StartLine).Take(section.EndLine - section.StartLine + 1).ToList();
 
@@ -127,5 +127,11 @@ public class Extractor
         return results;
     }
 
-
+    private class ExtractionResult
+    {
+        public bool Found { get; set; }
+        [JsonPropertyName("end_line_index")]
+        public int EndLineIndex { get; set; }
+        public required List<QuestionItem> Data { get; set; }
+    }
 }

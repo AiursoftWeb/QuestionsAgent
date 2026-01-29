@@ -4,7 +4,7 @@ namespace Aiursoft.QuestionsAgent.PluginFramework.Services;
 
 public class TextCleaner
 {
-    public List<string> NormalizeText(string content)
+    public virtual List<string> NormalizeText(string content)
     {
         // 1. Remove Markdown images
         var text = Regex.Replace(content, @"!\[.*?\]\(.*?\)", "");

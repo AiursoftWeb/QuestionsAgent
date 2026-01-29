@@ -23,7 +23,7 @@ public class OllamaClient
         _options = options.Value;
     }
 
-    public async Task<T?> CallOllamaJson<T>(string prompt)
+    public virtual async Task<T?> CallOllamaJson<T>(string prompt)
     {
         var client = _httpClientFactory.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_options.Token}");

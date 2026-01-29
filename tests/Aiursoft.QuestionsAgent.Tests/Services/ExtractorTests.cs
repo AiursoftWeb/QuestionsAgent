@@ -9,30 +9,32 @@ namespace Aiursoft.QuestionsAgent.Tests.Services;
 
 public class ExtractorTests
 {
-    private readonly Mock<OllamaClient> _mockOllamaClient;
-    private readonly Mock<ILogger<Extractor>> _mockLogger;
-    private readonly Extractor _extractor;
-
-    public ExtractorTests()
+    private Mock<OllamaClient> CreateMockOllamaClient<T>(T? returnValue) where T : class
     {
-        var mockHttpClientFactory = new Mock<IHttpClientFactory>();
-        var mockOllamaLogger = new Mock<ILogger<OllamaClient>>();
-        var mockOptions = new Mock<IOptions<OllamaOptions>>();
-        mockOptions.Setup(x => x.Value).Returns(new OllamaOptions
-        {
-            Instance = "http://localhost:11434",
-            Model = "test-model",
-            Token = "test-token"
-        });
+        var mockClient = new Mock<OllamaClient>(
+            Mock.Of<IHttpClientFactory>(),
+            Mock.Of<ILogger<OllamaClient>>(),
+            Options.Create(new OllamaOptions()));
 
-        _mockOllamaClient = new Mock<OllamaClient>(
-            mockHttpClientFactory.Object,
-            mockOllamaLogger.Object,
-            mockOptions.Object);
+        mockClient.Setup(x => x.CallOllamaJson<T>(It.IsAny<string>()))
+            .ReturnsAsync(returnValue);
 
-        _mockLogger = new Mock<ILogger<Extractor>>();
-        _extractor = new Extractor(_mockOllamaClient.Object, _mockLogger.Object);
+        return mockClient;
     }
+
+    private Mock<OllamaClient> CreateMockOllamaClientWithException<T>(Exception ex) where T : class
+    {
+        var mockClient = new Mock<OllamaClient>(
+            Mock.Of<IHttpClientFactory>(),
+            Mock.Of<ILogger<OllamaClient>>(),
+            Options.Create(new OllamaOptions()));
+
+        mockClient.Setup(x => x.CallOllamaJson<T>(It.IsAny<string>()))
+            .ThrowsAsync(ex);
+
+        return mockClient;
+    }
+
 
     [Fact]
     public async Task ExtractSectionAsync_SkipsAnswerSection()
@@ -41,13 +43,17 @@ public class ExtractorTests
         var lines = new List<string> { "Answer 1", "Answer 2" };
         var section = new SectionInfo { Type = "答案", StartLine = 0, EndLine = 1 };
 
+        var mockClient = CreateMockOllamaClient<ExtractionResult>(null);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
+
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         Assert.Empty(result);
-        _mockOllamaClient.Verify(
-            x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()),
+        mockClient.Verify(
+            x => x.CallOllamaJson<ExtractionResult>(It.IsAny<string>()),
             Times.Never);
     }
 
@@ -58,8 +64,12 @@ public class ExtractorTests
         var lines = new List<string> { "Unknown content" };
         var section = new SectionInfo { Type = "未知", StartLine = 0, EndLine = 0 };
 
+        var mockClient = CreateMockOllamaClient<ExtractionResult>(null);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
+
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         Assert.Empty(result);
@@ -72,8 +82,12 @@ public class ExtractorTests
         var lines = new List<string> { "Match A to B" };
         var section = new SectionInfo { Type = "连线", StartLine = 0, EndLine = 0 };
 
+        var mockClient = CreateMockOllamaClient<ExtractionResult>(null);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
+
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         Assert.Empty(result);
@@ -93,11 +107,11 @@ public class ExtractorTests
         var section = new SectionInfo { Type = "选择", StartLine = 0, EndLine = 3 };
 
         // Mock extraction result for single-item mode
-        var extractionResult = new
+        var extractionResult = new ExtractionResult
         {
-            found = true,
-            end_line_index = 2,
-            data = new List<QuestionItem>
+            Found = true,
+            EndLineIndex = 2,
+            Data = new List<QuestionItem>
             {
                 new QuestionItem
                 {
@@ -107,12 +121,12 @@ public class ExtractorTests
             }
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ReturnsAsync(extractionResult);
+        var mockClient = CreateMockOllamaClient(extractionResult);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
 
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         Assert.NotEmpty(result);
@@ -127,12 +141,12 @@ public class ExtractorTests
         var lines = new List<string> { "Question text" };
         var section = new SectionInfo { Type = "简答", StartLine = 0, EndLine = 0 };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ThrowsAsync(new Exception("Extraction failed"));
+        var mockClient = CreateMockOllamaClientWithException<ExtractionResult>(new Exception("Extraction failed"));
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
 
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         // Should continue and return empty (cursor increments and continues)
@@ -146,19 +160,19 @@ public class ExtractorTests
         var lines = new List<string> { "Not a question" };
         var section = new SectionInfo { Type = "简答", StartLine = 0, EndLine = 0 };
 
-        var extractionResult = new
+        var extractionResult = new ExtractionResult
         {
-            found = false,
-            end_line_index = 0,
-            data = new List<QuestionItem>()
+            Found = false,
+            EndLineIndex = 0,
+            Data = new List<QuestionItem>()
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ReturnsAsync(extractionResult);
+        var mockClient = CreateMockOllamaClient(extractionResult);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
 
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert
         Assert.Empty(result);
@@ -171,22 +185,22 @@ public class ExtractorTests
         var lines = new List<string> { "1. Simple question" };
         var section = new SectionInfo { Type = "填空", StartLine = 0, EndLine = 0 };
 
-        var extractionResult = new
+        var extractionResult = new ExtractionResult
         {
-            found = true,
-            end_line_index = 0,
-            data = new List<QuestionItem>
+            Found = true,
+            EndLineIndex = 0,
+            Data = new List<QuestionItem>
             {
                 new QuestionItem { Question = "Simple question" }
             }
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ReturnsAsync(extractionResult);
+        var mockClient = CreateMockOllamaClient(extractionResult);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
 
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "exam.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "exam.md");
 
         // Assert
         Assert.Single(result);
@@ -201,22 +215,22 @@ public class ExtractorTests
         var lines = new List<string> { "Q1", "Q2", "Q3" };
         var section = new SectionInfo { Type = "简答", StartLine = 0, EndLine = 2 };
 
-        var extractionResult = new
+        var extractionResult = new ExtractionResult
         {
-            found = true,
-            end_line_index = 100, // Exceeds window size
-            data = new List<QuestionItem>
+            Found = true,
+            EndLineIndex = 100, // Exceeds window size
+            Data = new List<QuestionItem>
             {
                 new QuestionItem { Question = "Test" }
             }
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ReturnsAsync(extractionResult);
+        var mockClient = CreateMockOllamaClient(extractionResult);
+        var mockLogger = new Mock<ILogger<Extractor>>();
+        var extractor = new Extractor(mockClient.Object, mockLogger.Object);
 
         // Act
-        var result = await _extractor.ExtractSectionAsync(lines, section, "test.md");
+        var result = await extractor.ExtractSectionAsync(lines, section, "test.md");
 
         // Assert - Should not throw and handle boundary correction
         Assert.NotEmpty(result);

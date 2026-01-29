@@ -9,14 +9,14 @@ namespace Aiursoft.QuestionsAgent.Tests.Services;
 
 public class ResultSaverTests
 {
-    private readonly Mock<ILogger<ResultSaver>> _mockLogger;
+
     private readonly ResultSaver _resultSaver;
     private readonly string _testOutputDir;
 
     public ResultSaverTests()
     {
-        _mockLogger = new Mock<ILogger<ResultSaver>>();
-        _resultSaver = new ResultSaver(_mockLogger.Object);
+        var mockLogger = new Mock<ILogger<ResultSaver>>();
+        _resultSaver = new ResultSaver(mockLogger.Object);
         _testOutputDir = Path.Combine(Path.GetTempPath(), "QuestionsAgentTests", Guid.NewGuid().ToString());
     }
 

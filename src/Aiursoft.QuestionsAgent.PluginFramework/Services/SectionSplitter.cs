@@ -17,7 +17,7 @@ public class SectionSplitter
         _logger = logger;
     }
 
-    public async Task<List<SectionInfo>> AnalyzeSectionsAsync(List<string> lines)
+    public virtual async Task<List<SectionInfo>> AnalyzeSectionsAsync(List<string> lines)
     {
         _logger.LogInformation("Analyzing document structure...");
 

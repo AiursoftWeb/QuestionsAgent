@@ -16,7 +16,7 @@ public class Matcher
         _logger = logger;
     }
 
-    public async Task FillAnswersAsync(List<QuestionItem> questions, string footerText)
+    public virtual async Task FillAnswersAsync(List<QuestionItem> questions, string footerText)
     {
         _logger.LogInformation("Starting to match answers for {Count} questions...", questions.Count);
 

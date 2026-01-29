@@ -9,29 +9,12 @@ namespace Aiursoft.QuestionsAgent.Tests.Services;
 
 public class MatcherTests
 {
-    private readonly Mock<OllamaClient> _mockOllamaClient;
-    private readonly Mock<ILogger<Matcher>> _mockLogger;
-    private readonly Matcher _matcher;
-
-    public MatcherTests()
+    private Mock<OllamaClient> CreateMockOllamaClient()
     {
-        var mockHttpClientFactory = new Mock<IHttpClientFactory>();
-        var mockOllamaLogger = new Mock<ILogger<OllamaClient>>();
-        var mockOptions = new Mock<IOptions<OllamaOptions>>();
-        mockOptions.Setup(x => x.Value).Returns(new OllamaOptions
-        {
-            Instance = "http://localhost:11434",
-            Model = "test-model",
-            Token = "test-token"
-        });
-
-        _mockOllamaClient = new Mock<OllamaClient>(
-            mockHttpClientFactory.Object,
-            mockOllamaLogger.Object,
-            mockOptions.Object);
-
-        _mockLogger = new Mock<ILogger<Matcher>>();
-        _matcher = new Matcher(_mockOllamaClient.Object, _mockLogger.Object);
+        return new Mock<OllamaClient>(
+            Mock.Of<IHttpClientFactory>(),
+            Mock.Of<ILogger<OllamaClient>>(),
+            Options.Create(new OllamaOptions()));
     }
 
     [Fact]
@@ -47,19 +30,23 @@ public class MatcherTests
         var footerText = "参考答案: 1. A 2. B";
 
         // Setup mock to return different answers
+        var mockClient = CreateMockOllamaClient();
         var callCount = 0;
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
+        
+        mockClient.Setup(x => x.CallOllamaJson<AnswerDTO>(It.IsAny<string>()))
             .ReturnsAsync(() =>
             {
                 callCount++;
                 return callCount == 1
-                    ? (object)new { answer = "A", analysis = "Analysis 1" }
-                    : (object)new { answer = "B", analysis = "Analysis 2" };
+                    ? new AnswerDTO { answer = "A", analysis = "Analysis 1" }
+                    : new AnswerDTO { answer = "B", analysis = "Analysis 2" };
             });
 
+        var mockLogger = new Mock<ILogger<Matcher>>();
+        var matcher = new Matcher(mockClient.Object, mockLogger.Object);
+
         // Act
-        await _matcher.FillAnswersAsync(questions, footerText);
+        await matcher.FillAnswersAsync(questions, footerText);
 
         // Assert
         Assert.Equal("A", questions[0].Answer);
@@ -77,12 +64,15 @@ public class MatcherTests
             new QuestionItem { Question = "Test question", Type = "选择" }
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
-            .ReturnsAsync((object?)null);
+        var mockClient = CreateMockOllamaClient();
+        mockClient.Setup(x => x.CallOllamaJson<AnswerDTO>(It.IsAny<string>()))
+            .ReturnsAsync((AnswerDTO?)null);
+
+        var mockLogger = new Mock<ILogger<Matcher>>();
+        var matcher = new Matcher(mockClient.Object, mockLogger.Object);
 
         // Act
-        await _matcher.FillAnswersAsync(questions, "footer");
+        await matcher.FillAnswersAsync(questions, "footer");
 
         // Assert
         Assert.Equal("未知", questions[0].Answer);
@@ -97,12 +87,15 @@ public class MatcherTests
             new QuestionItem { Question = "Test question", Type = "选择" }
         };
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
+        var mockClient = CreateMockOllamaClient();
+        mockClient.Setup(x => x.CallOllamaJson<AnswerDTO>(It.IsAny<string>()))
             .ThrowsAsync(new Exception("AI error"));
 
+        var mockLogger = new Mock<ILogger<Matcher>>();
+        var matcher = new Matcher(mockClient.Object, mockLogger.Object);
+
         // Act
-        await _matcher.FillAnswersAsync(questions, "footer");
+        await matcher.FillAnswersAsync(questions, "footer");
 
         // Assert
         Assert.Equal("Error", questions[0].Answer);
@@ -113,12 +106,15 @@ public class MatcherTests
     {
         // Arrange
         var questions = new List<QuestionItem>();
+        var mockClient = CreateMockOllamaClient();
+        var mockLogger = new Mock<ILogger<Matcher>>();
+        var matcher = new Matcher(mockClient.Object, mockLogger.Object);
 
         // Act & Assert - Should not throw
-        await _matcher.FillAnswersAsync(questions, "footer");
+        await matcher.FillAnswersAsync(questions, "footer");
         
-        _mockOllamaClient.Verify(
-            x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()),
+        mockClient.Verify(
+            x => x.CallOllamaJson<AnswerDTO>(It.IsAny<string>()),
             Times.Never);
     }
 
@@ -139,13 +135,16 @@ public class MatcherTests
         var footerText = "Answers here";
         string? capturedPrompt = null;
 
-        _mockOllamaClient
-            .Setup(x => x.CallOllamaJson<It.IsAnyType>(It.IsAny<string>()))
+        var mockClient = CreateMockOllamaClient();
+        mockClient.Setup(x => x.CallOllamaJson<AnswerDTO>(It.IsAny<string>()))
             .Callback<string>(prompt => capturedPrompt = prompt)
-            .ReturnsAsync(new { answer = "A", analysis = "" });
+            .ReturnsAsync(new AnswerDTO { answer = "A", analysis = "" });
+
+        var mockLogger = new Mock<ILogger<Matcher>>();
+        var matcher = new Matcher(mockClient.Object, mockLogger.Object);
 
         // Act
-        await _matcher.FillAnswersAsync(questions, footerText);
+        await matcher.FillAnswersAsync(questions, footerText);
 
         // Assert
         Assert.NotNull(capturedPrompt);

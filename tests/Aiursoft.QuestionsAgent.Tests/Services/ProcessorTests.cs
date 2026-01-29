@@ -14,7 +14,7 @@ public class ProcessorTests
     private readonly Mock<Extractor> _mockExtractor;
     private readonly Mock<Matcher> _mockMatcher;
     private readonly Mock<ResultSaver> _mockResultSaver;
-    private readonly Mock<ILogger<Processor>> _mockLogger;
+
     private readonly Processor _processor;
     private readonly string _testInputFile;
     private readonly string _testOutputDir;
@@ -34,7 +34,7 @@ public class ProcessorTests
         _mockExtractor = new Mock<Extractor>(mockOllamaClient, mockExtractorLogger.Object);
         _mockMatcher = new Mock<Matcher>(mockOllamaClient, mockMatcherLogger.Object);
         _mockResultSaver = new Mock<ResultSaver>(mockSaverLogger.Object);
-        _mockLogger = new Mock<ILogger<Processor>>();
+        var mockLogger = new Mock<ILogger<Processor>>();
 
         _processor = new Processor(
             _mockTextCleaner.Object,
@@ -42,7 +42,7 @@ public class ProcessorTests
             _mockExtractor.Object,
             _mockMatcher.Object,
             _mockResultSaver.Object,
-            _mockLogger.Object);
+            mockLogger.Object);
 
         _testInputFile = Path.Combine(Path.GetTempPath(), $"test_input_{Guid.NewGuid()}.md");
         _testOutputDir = Path.Combine(Path.GetTempPath(), $"test_output_{Guid.NewGuid()}");

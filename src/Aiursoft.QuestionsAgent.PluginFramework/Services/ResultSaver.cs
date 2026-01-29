@@ -14,7 +14,7 @@ public class ResultSaver
         _logger = logger;
     }
 
-    public async Task SaveQuestionsAsync(List<QuestionItem> items, string outputDir)
+    public virtual async Task SaveQuestionsAsync(List<QuestionItem> items, string outputDir)
     {
         if (!Directory.Exists(outputDir))
         {
