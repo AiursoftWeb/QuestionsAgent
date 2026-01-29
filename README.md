@@ -6,7 +6,6 @@
 [![NuGet version (Aiursoft.QuestionsAgent)](https://img.shields.io/nuget/v/Aiursoft.QuestionsAgent.svg)](https://www.nuget.org/packages/Aiursoft.QuestionsAgent/)
 [![Man hours](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/questionsagent.svg)](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/questionsagent.html)
 
-
 A CLI tool to parse markdown question files into JSON format using AI.
 
 ## Install
