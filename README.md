@@ -34,3 +34,21 @@ $ questions-agent process --input processing.md --instance http://localhost:1143
 * `--instance`: The Ollama instance to use. (Required)
 * `--model`: The Ollama model to use. (Required)
 * `--token`: The Ollama token to use. (Required)
+
+## Helper Tools
+
+### Word to Markdown Converter
+
+If you have Word documents (.doc, .docx) that need to be converted to Markdown first, use the helper script in [`assets/`](assets/):
+
+```bash
+# Convert Word documents to Markdown
+python3 assets/word_to_markdown.py ~/Documents/Exams all_exams.md
+
+# Then process with questions-agent
+questions-agent process --input all_exams.md --output results \
+  --instance http://localhost:11434/api/chat \
+  --model qwen --token your-token
+```
+
+See [`assets/README.md`](assets/README.md) for details.
