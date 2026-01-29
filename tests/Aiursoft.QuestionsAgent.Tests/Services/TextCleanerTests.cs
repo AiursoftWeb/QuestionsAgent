@@ -108,6 +108,7 @@ public class TextCleanerTests
         var result = _textCleaner.NormalizeText(content);
 
         // Assert
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         Assert.All(result, line =>
         {
             Assert.Equal(line.Trim(), line);

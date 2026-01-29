@@ -3,8 +3,6 @@ using Aiursoft.QuestionsAgent.PluginFramework.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System.Net;
-using System.Text.Json;
 using Xunit;
 
 namespace Aiursoft.QuestionsAgent.Tests.Services;
