@@ -127,11 +127,5 @@ public class Extractor
         return results;
     }
 
-    private class ExtractionResult
-    {
-        public bool Found { get; set; }
-        [JsonPropertyName("end_line_index")]
-        public int EndLineIndex { get; set; }
-        public required List<QuestionItem> Data { get; set; }
-    }
+
 }
