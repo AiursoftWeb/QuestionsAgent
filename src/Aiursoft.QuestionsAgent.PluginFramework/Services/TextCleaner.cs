@@ -7,7 +7,7 @@ public class TextCleaner
     public List<string> NormalizeText(string content)
     {
         // 1. Remove Markdown images
-        var text = Regex.Replace(content, @"!\.*?\(.*?\)", "");
+        var text = Regex.Replace(content, @"!\[.*?\]\(.*?\)", "");
         
         // 2. Ensure line breaks before question numbers and options
         text = Regex.Replace(text, @"(\s)(\d+\.)", "\n$2");

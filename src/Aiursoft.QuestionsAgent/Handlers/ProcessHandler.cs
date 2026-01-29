@@ -1,6 +1,7 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Aiursoft.CommandFramework.Framework;
+using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
 using Aiursoft.QuestionsAgent.PluginFramework.Models;
 using Aiursoft.QuestionsAgent.PluginFramework.Services;
@@ -67,9 +68,10 @@ public class ProcessHandler : ExecutableCommandHandlerBuilder
         var instance = parseResult.GetValue(OllamaInstanceOption)!;
         var model = parseResult.GetValue(OllamaModelOption)!;
         var token = parseResult.GetValue(OllamaTokenOption)!;
+        var verbose = parseResult.GetValue(CommonOptionsProvider.VerboseOption);
 
         var host = ServiceBuilder
-            .CreateCommandHostBuilder<Startup>(false)
+            .CreateCommandHostBuilder<Startup>(verbose)
             .ConfigureServices((_, services) =>
             {
                 services.Configure<OllamaOptions>(options =>
