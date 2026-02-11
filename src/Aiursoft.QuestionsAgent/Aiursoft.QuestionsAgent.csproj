@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <AssemblyName>questions-agent</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <TargetFramework>net10.0</TargetFramework>
-    <AssemblyName>questions-agent</AssemblyName>
+    <assemblyname>questions-agent</assemblyname>
     <RootNamespace>Aiursoft.QuestionsAgent</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
