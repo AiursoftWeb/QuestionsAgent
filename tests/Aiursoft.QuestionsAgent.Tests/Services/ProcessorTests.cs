@@ -77,7 +77,7 @@ public class ProcessorTests
     {
         // Arrange
         var content = "# 来源文件：test.md\n1. Question 1\nA. Option A";
-        await File.WriteAllTextAsync(_testInputFile, content);
+        await File.WriteAllTextAsync(_testInputFile, content, TestContext.Current.CancellationToken);
 
         var normalizedLines = new List<string> { "1. Question 1", "A. Option A" };
         var sections = new List<SectionInfo>
@@ -133,7 +133,7 @@ public class ProcessorTests
 Question from paper 1
 # 来源文件：paper2.md
 Question from paper 2";
-        await File.WriteAllTextAsync(_testInputFile, content);
+        await File.WriteAllTextAsync(_testInputFile, content, TestContext.Current.CancellationToken);
 
         var normalizedLines = new List<string> { "Question" };
         var sections = new List<SectionInfo>
@@ -183,7 +183,7 @@ Question from paper 2";
     {
         // Arrange
         var content = "# 来源文件：empty.md\n\n\n   ";
-        await File.WriteAllTextAsync(_testInputFile, content);
+        await File.WriteAllTextAsync(_testInputFile, content, TestContext.Current.CancellationToken);
 
         _mockTextCleaner
             .Setup(x => x.NormalizeText(It.IsAny<string>()))
@@ -206,7 +206,7 @@ Question from paper 2";
     {
         // Arrange
         var content = "# 来源文件：noquestions.md\nSome content";
-        await File.WriteAllTextAsync(_testInputFile, content);
+        await File.WriteAllTextAsync(_testInputFile, content, TestContext.Current.CancellationToken);
 
         var normalizedLines = new List<string> { "Some content" };
         var sections = new List<SectionInfo>

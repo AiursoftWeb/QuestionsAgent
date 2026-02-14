@@ -55,7 +55,7 @@ public class ResultSaverTests
         var filePath = Path.Combine(_testOutputDir, "选择.json");
         Assert.True(File.Exists(filePath));
 
-        var json = await File.ReadAllTextAsync(filePath);
+        var json = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
         var saved = JsonSerializer.Deserialize<List<QuestionItem>>(json);
         Assert.NotNull(saved);
         Assert.Single(saved);
@@ -84,7 +84,7 @@ public class ResultSaverTests
 
         // Assert
         var filePath = Path.Combine(_testOutputDir, "选择.json");
-        var json = await File.ReadAllTextAsync(filePath);
+        var json = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
         var saved = JsonSerializer.Deserialize<List<QuestionItem>>(json);
         Assert.NotNull(saved);
         Assert.Equal(2, saved.Count);
@@ -116,12 +116,12 @@ public class ResultSaverTests
         Assert.True(File.Exists(choiceFile));
         Assert.True(File.Exists(fillFile));
 
-        var choiceJson = await File.ReadAllTextAsync(choiceFile);
+        var choiceJson = await File.ReadAllTextAsync(choiceFile, TestContext.Current.CancellationToken);
         var choiceQuestions = JsonSerializer.Deserialize<List<QuestionItem>>(choiceJson);
         Assert.NotNull(choiceQuestions);
         Assert.Equal(2, choiceQuestions.Count);
 
-        var fillJson = await File.ReadAllTextAsync(fillFile);
+        var fillJson = await File.ReadAllTextAsync(fillFile, TestContext.Current.CancellationToken);
         var fillQuestions = JsonSerializer.Deserialize<List<QuestionItem>>(fillJson);
         Assert.NotNull(fillQuestions);
         Assert.Single(fillQuestions);
@@ -136,7 +136,7 @@ public class ResultSaverTests
         // Arrange
         Directory.CreateDirectory(_testOutputDir);
         var filePath = Path.Combine(_testOutputDir, "选择.json");
-        await File.WriteAllTextAsync(filePath, "{ corrupted json content");
+        await File.WriteAllTextAsync(filePath, "{ corrupted json content", TestContext.Current.CancellationToken);
 
         var questions = new List<QuestionItem>
         {
@@ -147,7 +147,7 @@ public class ResultSaverTests
         await _resultSaver.SaveQuestionsAsync(questions, _testOutputDir);
 
         // Assert - Should create new file with only new question
-        var json = await File.ReadAllTextAsync(filePath);
+        var json = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
         var saved = JsonSerializer.Deserialize<List<QuestionItem>>(json);
         Assert.NotNull(saved);
         Assert.Single(saved);
@@ -179,7 +179,7 @@ public class ResultSaverTests
 
         // Assert
         var filePath = Path.Combine(_testOutputDir, "选择.json");
-        var json = await File.ReadAllTextAsync(filePath);
+        var json = await File.ReadAllTextAsync(filePath, TestContext.Current.CancellationToken);
         var saved = JsonSerializer.Deserialize<List<QuestionItem>>(json);
         Assert.NotNull(saved);
         var item = saved[0];
